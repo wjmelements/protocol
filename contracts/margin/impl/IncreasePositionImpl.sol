@@ -225,7 +225,7 @@ library IncreasePositionImpl {
     }
 
     function getOwedTokenDeposit(
-        BorrowShared.Tx transaction,
+        BorrowShared.Tx memory transaction,
         uint256 collateralToAdd,
         bytes orderData
     )
@@ -250,7 +250,7 @@ library IncreasePositionImpl {
 
     function validateIncrease(
         MarginState.State storage state,
-        BorrowShared.Tx transaction,
+        BorrowShared.Tx memory transaction,
         MarginCommon.Position storage position
     )
         private
@@ -392,7 +392,7 @@ library IncreasePositionImpl {
     }
 
     function recordPositionIncreased(
-        BorrowShared.Tx transaction,
+        BorrowShared.Tx memory transaction,
         MarginCommon.Position storage position
     )
         private

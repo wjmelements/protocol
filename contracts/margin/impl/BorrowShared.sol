@@ -181,7 +181,7 @@ library BorrowShared {
      */
     function doSell(
         MarginState.State storage state,
-        Tx transaction,
+        Tx memory transaction,
         bytes orderData,
         uint256 maxHeldTokenToBuy
     )
@@ -229,7 +229,7 @@ library BorrowShared {
      */
     function doDepositOwedToken(
         MarginState.State storage state,
-        Tx transaction
+        Tx memory transaction
     )
         internal
     {
@@ -246,7 +246,7 @@ library BorrowShared {
      */
     function doDepositHeldToken(
         MarginState.State storage state,
-        Tx transaction
+        Tx memory transaction
     )
         internal
     {
@@ -264,7 +264,7 @@ library BorrowShared {
     // ============ Private Helper-Functions ============
 
     function validateTxPostSell(
-        Tx transaction
+        Tx memory transaction
     )
         private
         pure
@@ -286,7 +286,7 @@ library BorrowShared {
     }
 
     function getConsentFromSmartContractLender(
-        Tx transaction
+        Tx memory transaction
     )
         private
     {
@@ -332,7 +332,7 @@ library BorrowShared {
 
     function pullOwedTokensFromLender(
         MarginState.State storage state,
-        Tx transaction
+        Tx memory transaction
     )
         private
     {
@@ -347,7 +347,7 @@ library BorrowShared {
 
     function transferLoanFees(
         MarginState.State storage state,
-        Tx transaction
+        Tx memory transaction
     )
         private
     {
@@ -389,7 +389,7 @@ library BorrowShared {
     }
 
     function getLoanOfferingAddresses(
-        Tx transaction
+        Tx memory transaction
     )
         private
         pure
@@ -409,7 +409,7 @@ library BorrowShared {
     }
 
     function getLoanOfferingValues256(
-        Tx transaction
+        Tx memory transaction
     )
         private
         pure
@@ -427,7 +427,7 @@ library BorrowShared {
     }
 
     function getLoanOfferingValues32(
-        Tx transaction
+        Tx memory transaction
     )
         private
         pure

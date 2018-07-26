@@ -92,7 +92,7 @@ library CloseWithoutCounterpartyImpl {
     // ============ Private Helper-Functions ============
 
     function logEventOnCloseWithoutCounterparty(
-        ClosePositionShared.CloseTx transaction
+        ClosePositionShared.CloseTx memory transaction
     )
         private
     {

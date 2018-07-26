@@ -222,7 +222,7 @@ library MarginCommon {
     }
 
     function getLoanOfferingHash(
-        LoanOffering loanOffering
+        LoanOffering memory loanOffering
     )
         internal
         view
@@ -325,7 +325,7 @@ library MarginCommon {
     }
 
     function getValuesHash(
-        LoanOffering loanOffering
+        LoanOffering memory loanOffering
     )
         private
         pure

@@ -154,7 +154,7 @@ library OpenPositionImpl {
     }
 
     function recordPositionOpened(
-        BorrowShared.Tx transaction
+        BorrowShared.Tx memory transaction
     )
         private
     {

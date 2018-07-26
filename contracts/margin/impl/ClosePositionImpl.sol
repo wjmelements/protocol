@@ -168,7 +168,7 @@ library ClosePositionImpl {
 
     function buyBackOwedToken(
         MarginState.State storage state,
-        ClosePositionShared.CloseTx transaction,
+        ClosePositionShared.CloseTx memory transaction,
         bytes memory orderData
     )
         private
@@ -222,7 +222,7 @@ library ClosePositionImpl {
     }
 
     function logEventOnClose(
-        ClosePositionShared.CloseTx transaction,
+        ClosePositionShared.CloseTx memory transaction,
         uint256 buybackCostInHeldToken,
         uint256 payout
     )
