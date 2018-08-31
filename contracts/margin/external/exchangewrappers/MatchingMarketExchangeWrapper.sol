@@ -72,9 +72,9 @@ contract MatchingMarketExchangeWrapper is
     {
         assert(takerToken.balanceOf(address(this)) >= requestedFillAmount);
 
-        address market = MATCHING_MARKET;
-        takerToken.approve(market, requestedFillAmount);
-        uint256 receivedMakerAmount = MatchingMarketInterface(market).sellAllAmount(
+        MatchingMarketInterface market = MatchingMarketInterface(MATCHING_MARKET);
+        takerToken.approve(address(market), requestedFillAmount);
+        uint256 receivedMakerAmount = market.sellAllAmount(
             ERC20(takerToken),
             requestedFillAmount,
             ERC20(makerToken),

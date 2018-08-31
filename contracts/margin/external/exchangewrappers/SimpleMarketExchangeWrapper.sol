@@ -103,6 +103,7 @@ contract SimpleMarketExchangeWrapper is
             orderMakerAmount
         );
 
+        takerToken.approve(address(market), requestedFillAmount);
         require(
             market.buy(orderId, makerAmount),
             "SimpleMarketExchangeWrapper#exchange: Failed to buy() using the provided order"

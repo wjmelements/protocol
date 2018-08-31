@@ -164,11 +164,11 @@ contract('MatchingMarketExchangeWrapper', accounts => {
       );
     });
 
-    it('fails for zero maximum price', async () => {
+    it('fails for zero makerAmount (infinite max price)', async () => {
       const amount = new BigNumber("1e18");
       let price1 = web3Instance.utils.bytesToHex([]
-        .concat(toBytes32(new BigNumber("0")))
         .concat(toBytes32(new BigNumber("1e10")))
+        .concat(toBytes32(new BigNumber("0")))
       );
       await expectThrow(
         MMEW.getExchangeCost.call(
@@ -199,11 +199,13 @@ contract('MatchingMarketExchangeWrapper', accounts => {
   });
 
   describe('#exchange', () => {
-    it('succeeds', async () => {
+    it('succeeds twice', async () => {
       const amount = new BigNumber("1e18");
-      await DAI.issueTo(MMEW.address, amount);
       const expectedResult = await OasisDEX.getBuyAmount.call(WETH.address, DAI.address, amount);
-      const receipt = await transact(
+
+      // exchange once
+      await DAI.issueTo(MMEW.address, amount);
+      const receipt1 = await transact(
         MMEW.exchange,
         accounts[0],
         accounts[0],
@@ -212,8 +214,24 @@ contract('MatchingMarketExchangeWrapper', accounts => {
         amount,
         BYTES.EMPTY
       );
-      expect(receipt.result).to.be.bignumber.eq(expectedResult);
+
+      // exchange again
+      await DAI.issueTo(MMEW.address, amount);
+      const receipt2 = await transact(
+        MMEW.exchange,
+        accounts[0],
+        accounts[0],
+        WETH.address,
+        DAI.address,
+        amount,
+        BYTES.EMPTY
+      );
+
+      // check return values
+      expect(receipt1.result).to.be.bignumber.eq(expectedResult);
+      expect(receipt2.result).to.be.bignumber.eq(expectedResult);
     });
+
     it('fails for low maximum price', async () => {
       const amount = new BigNumber("1e18");
       let price = web3Instance.utils.bytesToHex([]
@@ -228,7 +246,7 @@ contract('MatchingMarketExchangeWrapper', accounts => {
           accounts[0],
           WETH.address,
           DAI.address,
-          1000,
+          amount,
           price
         )
       );
