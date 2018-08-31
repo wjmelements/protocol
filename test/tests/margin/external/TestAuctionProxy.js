@@ -13,7 +13,7 @@ const ERC20Short = artifacts.require("ERC20Short");
 const Margin = artifacts.require("Margin");
 
 const { zeroExOrderToBytes } = require('../../../helpers/BytesHelper');
-const { ADDRESSES, BIGNUMBERS } = require('../../../helpers/Constants');
+const { ADDRESSES, BIGNUMBERS, BYTES32 } = require('../../../helpers/Constants');
 const { expectThrow } = require('../../../helpers/ExpectHelper');
 const { transact } = require('../../../helpers/ContractHelper');
 const { doOpenPosition } = require('../../../helpers/MarginHelper');
@@ -45,7 +45,7 @@ contract('AuctionProxy', accounts => {
       ZeroExExchangeWrapper.deployed(),
       ZeroExExchange.deployed(),
     ]);
-    auctionProxy = await AuctionProxy.new(dydxMargin.address, ZeroExExchange.address);
+    auctionProxy = await AuctionProxy.new(dydxMargin.address);
     const tx = await doOpenPosition(accounts);
     positionId = tx.id;
 
@@ -68,15 +68,10 @@ contract('AuctionProxy', accounts => {
 
   describe('Constructor', () => {
     it('sets constants correctly', async () => {
-      const address1 = ADDRESSES.TEST[0];
-      const address2 = ADDRESSES.TEST[1];
-      const contract = await AuctionProxy.new(address1, address2);
-      const [c1, c2] = await Promise.all([
-        contract.DYDX_MARGIN.call(),
-        contract.ZERO_EX_V1_EXCHANGE.call()
-      ]);
-      expect(c1).to.eq(address1);
-      expect(c2).to.eq(address2);
+      const expectedAddress = ADDRESSES.TEST[0];
+      const contract = await AuctionProxy.new(expectedAddress);
+      const marginAddress = await contract.DYDX_MARGIN.call();
+      expect(marginAddress).to.eq(expectedAddress);
     });
 
     it('fails for bad constants', async () => {
@@ -103,6 +98,7 @@ contract('AuctionProxy', accounts => {
       await transact(
         auctionProxy.closePosition,
         positionId,
+        0,
         dutchAuction.address,
         zeroExExchangeWrapper.address,
         zeroExOrderToBytes(order)
@@ -110,6 +106,19 @@ contract('AuctionProxy', accounts => {
 
       const unavail = await zeroExExchange.getUnavailableTakerTokenAmount.call(getOrderHash(order));
       expect(order.takerTokenAmount.minus(unavail)).to.be.bignumber.lte(10);
+    });
+
+    it('returns zero for non-open position', async () => {
+      const order = await createOrder();
+      const receipt = await transact(
+        auctionProxy.closePosition,
+        BYTES32.BAD_ID,
+        0,
+        dutchAuction.address,
+        zeroExExchangeWrapper.address,
+        zeroExOrderToBytes(order)
+      );
+      expect(receipt.result).to.be.bignumber.equal(0);
     });
 
     it('fails early for taker fee', async () => {
@@ -121,6 +130,7 @@ contract('AuctionProxy', accounts => {
       await expectThrow(
         auctionProxy.closePosition(
           positionId,
+          0,
           dutchAuction.address,
           zeroExExchangeWrapper.address,
           zeroExOrderToBytes(order)
@@ -128,19 +138,32 @@ contract('AuctionProxy', accounts => {
       );
     });
 
-    it('fails early for expired order', async () => {
+    it('returns zero for large minCloseAmount', async () => {
+      const order = await createOrder();
+      const receipt = await transact(
+        auctionProxy.closePosition,
+        positionId,
+        order.makerTokenAmount,
+        dutchAuction.address,
+        zeroExExchangeWrapper.address,
+        zeroExOrderToBytes(order)
+      );
+      expect(receipt.result).to.be.bignumber.equal(0);
+    });
+
+    it('returns zero for expired order', async () => {
       const order = await createOrder();
       order.expirationUnixTimestampSec = new BigNumber(10);
       order.ecSignature = await signOrder(order);
-
-      await expectThrow(
-        auctionProxy.closePosition(
-          positionId,
-          dutchAuction.address,
-          zeroExExchangeWrapper.address,
-          zeroExOrderToBytes(order)
-        )
+      const receipt = await transact(
+        auctionProxy.closePosition,
+        positionId,
+        0,
+        dutchAuction.address,
+        zeroExExchangeWrapper.address,
+        zeroExOrderToBytes(order)
       );
+      expect(receipt.result).to.be.bignumber.equal(0);
     });
   });
 
